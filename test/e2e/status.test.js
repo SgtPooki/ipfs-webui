@@ -1,4 +1,4 @@
-const { test } = require('@playwright/test')
+import { expect, test } from '@bgotink/playwright-coverage'
 
 test.describe('Status page', () => {
   test.beforeEach(async ({ page }) => {

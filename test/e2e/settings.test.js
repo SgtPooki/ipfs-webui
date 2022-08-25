@@ -1,4 +1,4 @@
-const { test } = require('@playwright/test')
+import { test } from '@bgotink/playwright-coverage'
 
 test.describe('Settings screen', () => {
   test.beforeEach(async ({ page }) => {

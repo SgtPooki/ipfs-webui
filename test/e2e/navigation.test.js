@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test')
+import { expect, test } from '@bgotink/playwright-coverage'
 
 test.describe('Navigation menu', () => {
   test.beforeEach(async ({ page }) => {

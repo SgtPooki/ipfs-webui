@@ -1,7 +1,10 @@
-const { test, expect } = require('@playwright/test')
+// const { mixinFixtures: mixinCoverage } = require('@bgotink/playwright-coverage')
+import { expect, test } from '@bgotink/playwright-coverage'
 const fs = require('fs')
 const path = require('path')
 const ipfsClient = require('ipfs-http-client')
+
+// export const test = mixinCoverage(base)
 
 test.describe('Explore screen', () => {
   test.beforeEach(async ({ page }) => {

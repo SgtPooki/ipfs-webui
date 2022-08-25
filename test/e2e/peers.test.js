@@ -1,4 +1,4 @@
-const { test } = require('@playwright/test')
+import { test } from '@bgotink/playwright-coverage'
 const { createController } = require('ipfsd-ctl')
 const ipfsClient = require('ipfs-http-client')
 

@@ -1,4 +1,4 @@
-const { test } = require('@playwright/test')
+import { test } from '@bgotink/playwright-coverage'
 const { fixtureData } = require('./fixtures')
 const all = require('it-all')
 const filesize = require('filesize')

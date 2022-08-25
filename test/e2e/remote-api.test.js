@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test')
+import { expect, test } from '@bgotink/playwright-coverage'
 const { createController } = require('ipfsd-ctl')
 const getPort = require('get-port')
 const http = require('http')
