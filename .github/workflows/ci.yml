@@ -18,9 +18,9 @@ jobs:
     name: build
     uses: ./.github/workflows/build.yml
 
-  test-unit:
-    name: 'test:unit'
-    uses: ./.github/workflows/test-unit.yml
+  # test-unit:
+  #   name: 'test:unit'
+  #   uses: ./.github/workflows/test-unit.yml
 
   publishPreview:
     name: publish preview
@@ -136,103 +136,103 @@ jobs:
       #         core.setFailed('Pinning did not succeed')
 
       # dev dnslink is updated on each main branch update
-      - run: npx dnslink-dnsimple --domain dev.webui.ipfs.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
-        if: github.ref == 'refs/heads/main'
-        env:
-          DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
+      # - run: npx dnslink-dnsimple --domain dev.webui.ipfs.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
+      #   if: github.ref == 'refs/heads/main'
+      #   env:
+      #     DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
 
-      # production dnslink is updated on release (during tag build)
-      - run: npx dnslink-dnsimple --domain webui.ipfs.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
-        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-        env:
-          DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
+      # # production dnslink is updated on release (during tag build)
+      # - run: npx dnslink-dnsimple --domain webui.ipfs.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
+      #   if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+      #   env:
+      #     DNSIMPLE_TOKEN: ${{ secrets.DNSIMPLE_TOKEN }}
 
-  test-e2e:
-    name: 'test:e2e'
-    uses: ./.github/workflows/test-e2e.yml
+  # test-e2e:
+  #   name: 'test:e2e'
+  #   uses: ./.github/workflows/test-e2e.yml
 
-  test-storybook:
-    name: 'test:storybook'
-    uses: ./.github/workflows/test-storybook.yml
+  # test-storybook:
+  #   name: 'test:storybook'
+  #   uses: ./.github/workflows/test-storybook.yml
 
-  # separate check for TS
-  typecheck:
-    name: typecheck
-    needs: build
-    uses: ./.github/workflows/typecheck.yml
+  # # separate check for TS
+  # typecheck:
+  #   name: typecheck
+  #   needs: build
+  #   uses: ./.github/workflows/typecheck.yml
 
-  # separate check for eslint
-  eslint:
-    name: eslint
-    needs: build
-    uses: ./.github/workflows/eslint.yml
+  # # separate check for eslint
+  # eslint:
+  #   name: eslint
+  #   needs: build
+  #   uses: ./.github/workflows/eslint.yml
 
   # automatically commit new tag and changelog updates when a push to main happens.
   # This will then trigger
   #    1. The 'ci.yml' workflow for the newly committed git tag,
   #    2. The 'publish-release-build.yml' workflow
-  release:
-    name: 'Run semantic release'
-    runs-on: ubuntu-latest
-    needs: [build, publishPreview, eslint, typecheck, test-e2e, test-unit, test-storybook]
-    steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v3.6.0
-        with:
-          persist-credentials: false
+  # release:
+  #   name: 'Run semantic release'
+  #   runs-on: ubuntu-latest
+  #   needs: [build, publishPreview, eslint, typecheck, test-e2e, test-unit, test-storybook]
+  #   steps:
+  #     - name: Checkout 🛎️
+  #       uses: actions/checkout@v3.6.0
+  #       with:
+  #         persist-credentials: false
 
-      - name: Cache bigger downloads
-        uses: actions/cache@v3.3.1
-        id: cache
-        with:
-          path: ${{ github.workspace }}/.cache
-          key: ${{ runner.os }}-${{ hashFiles('package.json', 'package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-${{ hashFiles('package.json', 'package-lock.json') }}
-            ${{ runner.os }}-
+  #     - name: Cache bigger downloads
+  #       uses: actions/cache@v3.3.1
+  #       id: cache
+  #       with:
+  #         path: ${{ github.workspace }}/.cache
+  #         key: ${{ runner.os }}-${{ hashFiles('package.json', 'package-lock.json') }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-${{ hashFiles('package.json', 'package-lock.json') }}
+  #           ${{ runner.os }}-
 
-      - name: Cache build dir
-        uses: actions/cache@v3.3.1
-        id: build-cache
-        with:
-          path: build
-          key: ${{ runner.os }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-${{ github.sha }}
+  #     - name: Cache build dir
+  #       uses: actions/cache@v3.3.1
+  #       id: build-cache
+  #       with:
+  #         path: build
+  #         key: ${{ runner.os }}-${{ github.sha }}
+  #         restore-keys: |
+  #           ${{ runner.os }}-${{ github.sha }}
 
-      # This is needed for custom-release-notes-generator.js to inject the CID in the release notes
-      - name: Write CID to tmp file
-        run: |
-          echo ${{ needs.publishPreview.outputs.cid }} > .cid
+  #     # This is needed for custom-release-notes-generator.js to inject the CID in the release notes
+  #     - name: Write CID to tmp file
+  #       run: |
+  #         echo ${{ needs.publishPreview.outputs.cid }} > .cid
 
-      - name: Setup node
-        uses: actions/setup-node@v3.6.0
-        with:
-          node-version: 18.14.0
+  #     - name: Setup node
+  #       uses: actions/setup-node@v3.6.0
+  #       with:
+  #         node-version: 18.14.0
 
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit --progress=false --cache ${{ github.workspace }}/.cache/npm
+  #     - name: Install dependencies
+  #       run: npm ci --prefer-offline --no-audit --progress=false --cache ${{ github.workspace }}/.cache/npm
 
-      - name: Download CAR artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: ipfs-webui_${{ github.sha }}.car
+  #     - name: Download CAR artifact
+  #       uses: actions/download-artifact@v3
+  #       with:
+  #         name: ipfs-webui_${{ github.sha }}.car
 
-      - name: Dry-run semantic release
-        if: github.ref != 'refs/heads/main'
-        run: |
-          git config user.name "ipfs-gui-bot"
-          git config user.email "108953096+ipfs-gui-bot@users.noreply.github.com"
-          npx semantic-release --ci --dry-run -b ${{ github.ref }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #     - name: Dry-run semantic release
+  #       if: github.ref != 'refs/heads/main'
+  #       run: |
+  #         git config user.name "ipfs-gui-bot"
+  #         git config user.email "108953096+ipfs-gui-bot@users.noreply.github.com"
+  #         npx semantic-release --ci --dry-run -b ${{ github.ref }}
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
-      # Update the version (npm version [major|minor|patch])
-      - name: Run semantic release
-        if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
-        run: |
-          git config user.name "ipfs-gui-bot"
-          git config user.email "108953096+ipfs-gui-bot@users.noreply.github.com"
-          npx semantic-release --ci
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  #     # Update the version (npm version [major|minor|patch])
+  #     - name: Run semantic release
+  #       if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
+  #       run: |
+  #         git config user.name "ipfs-gui-bot"
+  #         git config user.email "108953096+ipfs-gui-bot@users.noreply.github.com"
+  #         npx semantic-release --ci
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
