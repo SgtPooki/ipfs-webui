@@ -87,7 +87,7 @@ jobs:
 
       - name: use w3cli to upload the car file
         run: |
-          npm run w3cli -- up -c ipfs-webui_${{ github.sha }}.car
+          npx -y --package=@web3-storage/w3cli -- w3 up -c ipfs-webui_${{ github.sha }}.car
 
       # - name: Pin to estuary.tech
       #   id: pin-estuary
