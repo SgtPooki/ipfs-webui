@@ -85,51 +85,55 @@ jobs:
           path: ipfs-webui_${{ github.sha }}.car
           if-no-files-found: error
 
-      - name: Pin to estuary.tech
-        id: pin-estuary
-        continue-on-error: true
+      - name: use w3cli to upload the car file
         run: |
-          curl -X POST https://api.estuary.tech/pinning/pins -d '{ "name": "'$PIN_NAME'", "cid": "'$PIN_CID'" }' -H "Content-Type: application/json" -H "Authorization: Bearer $ESTUARY_API_TOKEN"
-          curl -X GET https://api.estuary.tech/pinning/pins -H "Content-Type: application/json" -H "Authorization: Bearer $ESTUARY_API_TOKEN"
-        env:
-          ESTUARY_API_TOKEN: ${{ secrets.ESTUARY_API_TOKEN }}
-          PIN_CID: ${{ steps.ipfs.outputs.cid }}
-          PIN_NAME: "ipfs-webui@${{ github.sha }}"
+          npm run w3cli -- up -c ipfs-webui_${{ github.sha }}.car
 
-      - name: Pin to ipfs-websites.collab.ipfscluster.io
-        id: pin-cluster
-        continue-on-error: true
-        run: |
-          ipfs-cluster-ctl --enc=json \
-            --host "${CLUSTER_HOST}" \
-            --basic-auth "$CLUSTER_USER:$CLUSTER_PASSWORD" \
-            peers ls > cluster-peers-ls
-          for maddr in $(jq -r '.ipfs.addresses[]?' cluster-peers-ls); do
-            ipfs swarm peering add "$maddr" &
-            ipfs swarm connect "$maddr" &
-          done
-          ipfs-cluster-ctl --enc=json \
-              --host "${CLUSTER_HOST}" \
-              --basic-auth "${CLUSTER_USER}:${CLUSTER_PASSWORD}" \
-              pin add \
-              --name "${PIN_NAME}" \
-              --replication-min 1 \
-              --replication-max 3 \
-              --wait \
-              $PIN_CID
-        env:
-          CLUSTER_HOST: "/dnsaddr/ipfs-websites.collab.ipfscluster.io"
-          CLUSTER_USER: ${{ secrets.CLUSTER_USER }}
-          CLUSTER_PASSWORD: ${{ secrets.CLUSTER_PASSWORD }}
-          PIN_CID: ${{ steps.ipfs.outputs.cid }}
-          PIN_NAME: "ipfs-webui@${{ github.sha }}"
+      # - name: Pin to estuary.tech
+      #   id: pin-estuary
+      #   continue-on-error: true
+      #   run: |
+      #     curl -X POST https://api.estuary.tech/pinning/pins -d '{ "name": "'$PIN_NAME'", "cid": "'$PIN_CID'" }' -H "Content-Type: application/json" -H "Authorization: Bearer $ESTUARY_API_TOKEN"
+      #     curl -X GET https://api.estuary.tech/pinning/pins -H "Content-Type: application/json" -H "Authorization: Bearer $ESTUARY_API_TOKEN"
+      #   env:
+      #     ESTUARY_API_TOKEN: ${{ secrets.ESTUARY_API_TOKEN }}
+      #     PIN_CID: ${{ steps.ipfs.outputs.cid }}
+      #     PIN_NAME: "ipfs-webui@${{ github.sha }}"
 
-      - name: Fail job due to pinning failure
-        if: steps.pin-estuary.outcome == 'failure' && steps.pin-cluster.outcome == 'failure'
-        uses: actions/github-script@v6
-        with:
-          script: |
-              core.setFailed('Pinning did not succeed')
+      # - name: Pin to ipfs-websites.collab.ipfscluster.io
+      #   id: pin-cluster
+      #   continue-on-error: true
+      #   run: |
+      #     ipfs-cluster-ctl --enc=json \
+      #       --host "${CLUSTER_HOST}" \
+      #       --basic-auth "$CLUSTER_USER:$CLUSTER_PASSWORD" \
+      #       peers ls > cluster-peers-ls
+      #     for maddr in $(jq -r '.ipfs.addresses[]?' cluster-peers-ls); do
+      #       ipfs swarm peering add "$maddr" &
+      #       ipfs swarm connect "$maddr" &
+      #     done
+      #     ipfs-cluster-ctl --enc=json \
+      #         --host "${CLUSTER_HOST}" \
+      #         --basic-auth "${CLUSTER_USER}:${CLUSTER_PASSWORD}" \
+      #         pin add \
+      #         --name "${PIN_NAME}" \
+      #         --replication-min 1 \
+      #         --replication-max 3 \
+      #         --wait \
+      #         $PIN_CID
+      #   env:
+      #     CLUSTER_HOST: "/dnsaddr/ipfs-websites.collab.ipfscluster.io"
+      #     CLUSTER_USER: ${{ secrets.CLUSTER_USER }}
+      #     CLUSTER_PASSWORD: ${{ secrets.CLUSTER_PASSWORD }}
+      #     PIN_CID: ${{ steps.ipfs.outputs.cid }}
+      #     PIN_NAME: "ipfs-webui@${{ github.sha }}"
+
+      # - name: Fail job due to pinning failure
+      #   if: steps.pin-estuary.outcome == 'failure' && steps.pin-cluster.outcome == 'failure'
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #         core.setFailed('Pinning did not succeed')
 
       # dev dnslink is updated on each main branch update
       - run: npx dnslink-dnsimple --domain dev.webui.ipfs.io --link /ipfs/${{ steps.ipfs.outputs.cid }}
