@@ -88,13 +88,10 @@ jobs:
       - name: w3cli whoami
         run: npx -y --package=@web3-storage/w3cli -- w3 whoami
 
-      - name: move w3cli json to conf file # see https://github.com/web3-storage/w3cli#where-are-my-keys-and-delegations-stored
-        run: 'echo "${W3CLI_JSON}" > ~/.config/w3access'
+      - name: use ipfs-webui space
+        run: npx -y --package=@web3-storage/w3cli -- w3 space use "${W3_SPACE_DID}"
         env:
-          W3CLI_JSON: ${{ secrets.W3CLI_JSON }}
-
-      - name: w3cli whoami after writing file
-        run: npx -y --package=@web3-storage/w3cli -- w3 whoami
+          W3_SPACE_DID: ${{ secrets.W3_SPACE_DID }}
 
       - name: use w3cli to upload the car file
         run: |
