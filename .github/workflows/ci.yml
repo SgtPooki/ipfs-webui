@@ -88,10 +88,22 @@ jobs:
       - name: w3cli whoami
         run: npx -y --package=@web3-storage/w3cli -- w3 whoami
 
-      - name: use ipfs-webui space
-        run: npx -y --package=@web3-storage/w3cli -- w3 space use "${W3_SPACE_DID}"
+      - name: w3cli add ipfs-webui-ci space
+        run: |
+          cat "${W3CLI_DELEGATION_PROOF_BASE64}" | base64 -d > ./ipfs-webui-ci-space.ucan.proof
+          npx -y --package=@web3-storage/w3cli -- w3 space add './ipfs-webui-ci-space.ucan.proof'
         env:
-          W3_SPACE_DID: ${{ secrets.W3_SPACE_DID }}
+          W3CLI_DELEGATION_PROOF_BASE64: ${{ secrets.W3CLI_DELEGATION_PROOF_BASE64 }}
+
+      # - name: use ipfs-webui space
+      #   run: npx -y --package=@web3-storage/w3cli -- w3 space create './ipfs-webui-ci-space.ucan.proof'
+      #   env:
+      #     W3_SPACE_DID: ${{ secrets.W3_SPACE_DID }}
+
+      # - name: use ipfs-webui space
+      #   run: npx -y --package=@web3-storage/w3cli -- w3 space use "${W3_SPACE_DID}"
+      #   env:
+      #     W3_SPACE_DID: ${{ secrets.W3_SPACE_DID }}
 
       - name: use w3cli to upload the car file
         run: |
