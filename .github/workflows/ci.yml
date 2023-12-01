@@ -80,12 +80,16 @@ jobs:
       - name: Create ipfs-webui.car file
         run: |
           ipfs dag export ${{ steps.ipfs.outputs.cid }} > ipfs-webui_${{ github.sha }}.car
-      - name: Attach produced build to Github Action
-        uses: actions/upload-artifact@v3
-        with:
-          name: ipfs-webui_${{ github.sha }}.car
-          path: ipfs-webui_${{ github.sha }}.car
-          if-no-files-found: error
+          npx -y --package=@web3-storage/w3cli@latest -- w3 whoami
+          echo $W3CLI_DELEGATION_PROOF_BASE64 | base64 -d > ./ipfs-webui-ci-space.ucan.proof
+          npx -y --package=@web3-storage/w3cli@latest -- w3 space add ./ipfs-webui-ci-space.ucan.proof
+          npx -y --package=@web3-storage/w3cli@latest -- w3 up --no-wrap -c ipfs-webui_${{ github.sha }}.car
+      # - name: Attach produced build to Github Action
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ipfs-webui_${{ github.sha }}.car
+      #     path: ipfs-webui_${{ github.sha }}.car
+      #     if-no-files-found: error
 
       # - name: pin with Fleek
       #   run: |
@@ -95,15 +99,15 @@ jobs:
       #   run: |
       #     ipfs cid base32 QmS4tE76QGjiuH3DU18Ca6oZiZD9U3UzshPFMgnQ7dExCX
 
-      - name: w3cli whoami
-        run: npx -y --package=@web3-storage/w3cli@latest -- w3 whoami
+      # - name: w3cli whoami
+      #   run: npx -y --package=@web3-storage/w3cli@latest -- w3 whoami
 
-      - name: w3cli add ipfs-webui-ci space
-        run: |
-          cat "${W3CLI_DELEGATION_PROOF_BASE64}" | base64 -d > ./ipfs-webui-ci-space.ucan.proof
-          npx -y --package=@web3-storage/w3cli@latest -- w3 space add ./ipfs-webui-ci-space.ucan.proof
-        env:
-          W3CLI_DELEGATION_PROOF_BASE64: ${{ secrets.W3CLI_DELEGATION_PROOF_BASE64 }}
+      # - name: w3cli add ipfs-webui-ci space
+      #   run: |
+      #     cat "${W3CLI_DELEGATION_PROOF_BASE64}" | base64 -d > ./ipfs-webui-ci-space.ucan.proof
+      #     npx -y --package=@web3-storage/w3cli@latest -- w3 space add ./ipfs-webui-ci-space.ucan.proof
+      #   env:
+      #     W3CLI_DELEGATION_PROOF_BASE64: ${{ secrets.W3CLI_DELEGATION_PROOF_BASE64 }}
 
       # - name: use ipfs-webui space
       #   run: npx -y --package=@web3-storage/w3cli@latest -- w3 space create './ipfs-webui-ci-space.ucan.proof'
