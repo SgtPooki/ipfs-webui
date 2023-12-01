@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - feat/fork-use-w3cli
     tags:
       - '*'
   pull_request:
