@@ -69,6 +69,7 @@ jobs:
       - uses: ipfs/start-ipfs-daemon-action@v1
       - name: Import build/ to IPFS
         id: ipfs
+        # npx -y kubo@latest add --cid-version 1 -Q -r ./build
         run: |
           root_cid=$(ipfs add --cid-version 1 -Q -r ./build)
           echo "cid=$root_cid" >> $GITHUB_OUTPUT
@@ -85,29 +86,37 @@ jobs:
           path: ipfs-webui_${{ github.sha }}.car
           if-no-files-found: error
 
+      # - name: pin with Fleek
+      #   run: |
+      #     fleek ipfs add
+
+      # - name: convert CIDv0 from fleek to CIDv1
+      #   run: |
+      #     ipfs cid base32 QmS4tE76QGjiuH3DU18Ca6oZiZD9U3UzshPFMgnQ7dExCX
+
       - name: w3cli whoami
-        run: npx -y --package=@web3-storage/w3cli@v4.2.0 -- w3 whoami
+        run: npx -y --package=@web3-storage/w3cli@latest -- w3 whoami
 
       - name: w3cli add ipfs-webui-ci space
         run: |
           cat "${W3CLI_DELEGATION_PROOF_BASE64}" | base64 -d > ./ipfs-webui-ci-space.ucan.proof
-          npx -y --package=@web3-storage/w3cli@v4.2.0 -- w3 space add './ipfs-webui-ci-space.ucan.proof'
+          npx -y --package=@web3-storage/w3cli@latest -- w3 space add ./ipfs-webui-ci-space.ucan.proof
         env:
           W3CLI_DELEGATION_PROOF_BASE64: ${{ secrets.W3CLI_DELEGATION_PROOF_BASE64 }}
 
       # - name: use ipfs-webui space
-      #   run: npx -y --package=@web3-storage/w3cli@v4.2.0 -- w3 space create './ipfs-webui-ci-space.ucan.proof'
+      #   run: npx -y --package=@web3-storage/w3cli@latest -- w3 space create './ipfs-webui-ci-space.ucan.proof'
       #   env:
       #     W3_SPACE_DID: ${{ secrets.W3_SPACE_DID }}
 
       # - name: use ipfs-webui space
-      #   run: npx -y --package=@web3-storage/w3cli@v4.2.0 -- w3 space use "${W3_SPACE_DID}"
+      #   run: npx -y --package=@web3-storage/w3cli@latest -- w3 space use "${W3_SPACE_DID}"
       #   env:
       #     W3_SPACE_DID: ${{ secrets.W3_SPACE_DID }}
 
-      - name: use w3cli to upload the car file
-        run: |
-          npx -y --package=@web3-storage/w3cli@v4.2.0 -- w3 up -c ipfs-webui_${{ github.sha }}.car
+      # - name: use w3cli to upload the car file
+      #   run: |
+      #     npx -y --package=@web3-storage/w3cli@latest -- w3 up -c ipfs-webui_${{ github.sha }}.car
 
       # - name: Pin to estuary.tech
       #   id: pin-estuary
