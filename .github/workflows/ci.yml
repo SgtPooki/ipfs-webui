@@ -80,10 +80,19 @@ jobs:
       - name: Create ipfs-webui.car file
         run: |
           ipfs dag export ${{ steps.ipfs.outputs.cid }} > ipfs-webui_${{ github.sha }}.car
+          echo "created car file"
+
           npx -y --package=@web3-storage/w3cli@latest -- w3 whoami
-          echo $W3CLI_DELEGATION_PROOF_BASE64 | base64 -d > ./ipfs-webui-ci-space.ucan.proof
-          npx -y --package=@web3-storage/w3cli@latest -- w3 space add ./ipfs-webui-ci-space.ucan.proof
+          echo "got whoami"
+
+          echo $W3CLI_DELEGATION_PROOF_BASE64 | base64 -d > ipfs-webui-ci-space.ucan.proof
+          echo "converted base64 env var to file"
+
+          npx -y --package=@web3-storage/w3cli@latest -- w3 space add ipfs-webui-ci-space.ucan.proof
+          echo "added space"
+
           npx -y --package=@web3-storage/w3cli@latest -- w3 up --no-wrap -c ipfs-webui_${{ github.sha }}.car
+          echo "uploaded car"
       # - name: Attach produced build to Github Action
       #   uses: actions/upload-artifact@v3
       #   with:
