@@ -92,8 +92,8 @@ jobs:
           echo $W3CLI_SPACE_DELEGATION_PROOF_BASE64_STRING | base64 -d > ipfs-webui-ci-space.ucan.proof
           echo "converted base64 env var to file"
 
-          npx -y --package=@web3-storage/w3cli@latest -- w3 proof add ipfs-webui-ci-space.ucan.proof
-          echo "added proof"
+          # npx -y --package=@web3-storage/w3cli@latest -- w3 proof add ipfs-webui-ci-space.ucan.proof
+          # echo "added proof"
 
           export W3CLI_SPACE_DID=$(npx -y --package=@web3-storage/w3cli@latest -- w3 space add ipfs-webui-ci-space.ucan.proof)
           echo "added space"
