@@ -82,10 +82,6 @@ jobs:
           ipfs dag export ${{ steps.ipfs.outputs.cid }} > ipfs-webui_${{ github.sha }}.car
           echo "created car file"
 
-          # set w3cli principal from https://github.com/web3-storage/w3cli#w3_principal
-          export W3_PRINCIPAL=$W3_AGENT_PRINCIPAL
-          export W3_STORE_NAME="ipfs-webui-ci"
-
           npx -y --package=@web3-storage/w3cli@latest -- w3 whoami
           echo "got whoami"
 
@@ -104,8 +100,10 @@ jobs:
           npx -y --package=@web3-storage/w3cli@latest -- w3 up --no-wrap -c ipfs-webui_${{ github.sha }}.car
           echo "uploaded car"
         env:
+          W3_STORE_NAME: ipfs-webui-ci
           W3_AGENT_DID: ${{ secrets.W3_AGENT_DID }}
-          W3_PRINCIPAL: ${{ secrets.W3_PRINCIPAL }}
+          # set w3cli principal from https://github.com/web3-storage/w3cli#w3_principal
+          W3_PRINCIPAL: ${{ secrets.W3_AGENT_PRINCIPAL }}
           W3CLI_SPACE_DELEGATION_PROOF_BASE64_STRING: ${{ secrets.W3CLI_SPACE_DELEGATION_PROOF_BASE64_STRING }}
       # - name: Attach produced build to Github Action
       #   uses: actions/upload-artifact@v3
